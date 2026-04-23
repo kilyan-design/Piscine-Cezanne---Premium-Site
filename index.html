@@ -1,0 +1,568 @@
+import React, { useState, useEffect, useRef } from 'react';
+import { 
+  Phone, 
+  MapPin, 
+  Clock, 
+  Menu, 
+  X, 
+  ChevronRight, 
+  Star, 
+  Droplets, 
+  Wrench, 
+  CheckCircle, 
+  Calendar,
+  ArrowRight
+} from 'lucide-react';
+
+// --- ANIMATION COMPONENT ---
+// A reusable component for premium slide-up/fade-in scroll animations
+const Reveal = ({ children, className = "", delay = 0 }) => {
+  const [isVisible, setIsVisible] = useState(false);
+  const ref = useRef(null);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsVisible(true);
+          observer.unobserve(entry.target);
+        }
+      },
+      { threshold: 0.1, rootMargin: '0px 0px -50px 0px' }
+    );
+
+    if (ref.current) observer.observe(ref.current);
+    return () => observer.disconnect();
+  }, []);
+
+  return (
+    <div
+      ref={ref}
+      className={`transition-all duration-1000 ease-out ${
+        isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-12'
+      } ${className}`}
+      style={{ transitionDelay: `${delay}ms` }}
+    >
+      {children}
+    </div>
+  );
+};
+
+// --- MAIN APPLICATION ---
+export default function App() {
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [activeModal, setActiveModal] = useState(null); // 'devis', 'rappel', or null
+
+  // Images vérifiées 200% fiables (Haute disponibilité et cohérence premium)
+  const images = {
+    hero: "https://images.unsplash.com/photo-1576013551627-0cc20b96c2a7?auto=format&fit=crop&w=2000&q=80", // Piscine moderne luxe
+    construction: "https://images.unsplash.com/photo-1582268611958-ebfd161ef9cf?auto=format&fit=crop&w=800&q=80", // Villa moderne avec piscine (Création)
+    entretien: "https://images.unsplash.com/photo-1532616281691-17c376174a75?auto=format&fit=crop&w=800&q=80", // Eau parfaitement cristalline
+    renovation: "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=800&q=80" // Rénovation (celle qui fonctionnait déjà)
+  };
+
+  return (
+    <div className="min-h-screen bg-slate-50 font-sans text-slate-800 overflow-x-hidden">
+      
+      {/* --- TOP BAR --- */}
+      <div className="hidden md:flex justify-between items-center bg-slate-900 text-slate-300 px-8 py-2 text-sm">
+        <div className="flex items-center gap-6">
+          <span className="flex items-center gap-2"><MapPin size={14} className="text-amber-500" /> 105 Chem. des Plâtrières, 13090 Aix-en-Provence</span>
+          <span className="flex items-center gap-2"><Clock size={14} className="text-amber-500" /> Lun - Sam : 08:00 - 20:00</span>
+        </div>
+        <div className="flex items-center gap-4">
+          <div className="flex text-amber-400"><Star size={12} fill="currentColor"/><Star size={12} fill="currentColor"/><Star size={12} fill="currentColor"/><Star size={12} fill="currentColor"/></div>
+          <span className="text-xs">Recommandé par nos clients</span>
+        </div>
+      </div>
+
+      {/* --- NAVBAR --- */}
+      <nav className="sticky top-0 w-full z-40 bg-white/90 backdrop-blur-md shadow-sm">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center h-20">
+            {/* Logo */}
+            <div className="flex-shrink-0 flex items-center cursor-pointer">
+              <span className="text-2xl font-bold tracking-tighter text-slate-900 uppercase">
+                Piscine <span className="text-amber-600 font-light">Cezanne</span>
+              </span>
+            </div>
+
+            {/* Desktop Menu */}
+            <div className="hidden md:flex items-center space-x-8">
+              <a href="#services" className="text-slate-600 hover:text-amber-600 font-medium transition-colors">Nos Services</a>
+              <a href="#avis" className="text-slate-600 hover:text-amber-600 font-medium transition-colors">Témoignages</a>
+              <button 
+                onClick={() => setActiveModal('rappel')}
+                className="flex items-center gap-2 text-slate-600 hover:text-amber-600 font-medium transition-colors"
+              >
+                <Phone size={18} /> Être rappelé
+              </button>
+              <button 
+                onClick={() => setActiveModal('devis')}
+                className="bg-slate-900 hover:bg-slate-800 text-white px-6 py-2.5 rounded-full font-medium transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+              >
+                Simulation de devis
+              </button>
+            </div>
+
+            {/* Mobile menu button */}
+            <div className="md:hidden flex items-center">
+              <button onClick={() => setIsMenuOpen(!isMenuOpen)} className="text-slate-900 p-2">
+                {isMenuOpen ? <X size={28} /> : <Menu size={28} />}
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Mobile Menu Dropdown */}
+        {isMenuOpen && (
+          <div className="md:hidden bg-white border-t border-slate-100 absolute w-full shadow-xl">
+            <div className="px-4 pt-2 pb-6 space-y-2 text-center">
+              <a href="#services" onClick={() => setIsMenuOpen(false)} className="block px-3 py-4 text-slate-700 font-medium border-b border-slate-50">Nos Services</a>
+              <a href="#avis" onClick={() => setIsMenuOpen(false)} className="block px-3 py-4 text-slate-700 font-medium border-b border-slate-50">Témoignages</a>
+              <button onClick={() => { setActiveModal('rappel'); setIsMenuOpen(false); }} className="block w-full px-3 py-4 text-slate-700 font-medium border-b border-slate-50">
+                Être rappelé
+              </button>
+              <button onClick={() => { setActiveModal('devis'); setIsMenuOpen(false); }} className="block w-full mt-4 bg-amber-600 text-white px-3 py-4 rounded-xl font-medium">
+                Simulation de devis
+              </button>
+            </div>
+          </div>
+        )}
+      </nav>
+
+      {/* --- HERO SECTION --- */}
+      <section className="relative h-[85vh] min-h-[600px] flex items-center justify-center overflow-hidden">
+        {/* Background Image with Overlay */}
+        <div className="absolute inset-0 z-0">
+          <img 
+            src={images.hero} 
+            alt="Piscine luxueuse Aix-en-Provence" 
+            className="w-full h-full object-cover object-center scale-105 animate-[pulse_20s_ease-in-out_infinite_alternate]"
+          />
+          <div className="absolute inset-0 bg-gradient-to-r from-slate-900/90 via-slate-900/70 to-transparent"></div>
+        </div>
+
+        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
+          <Reveal className="max-w-3xl">
+            <div className="inline-block px-4 py-1.5 rounded-full bg-amber-500/20 text-amber-400 border border-amber-500/30 text-sm font-semibold tracking-wide mb-6 backdrop-blur-sm">
+              EXPERT PISCINISTE À AIX-EN-PROVENCE
+            </div>
+            <h1 className="text-5xl md:text-7xl font-bold text-white leading-tight mb-6">
+              L'excellence <br />
+              <span className="text-amber-500 italic font-serif">au fil de l'eau.</span>
+            </h1>
+            <p className="text-lg md:text-xl text-slate-300 mb-10 max-w-xl leading-relaxed">
+              Construction sur-mesure, rénovation experte et entretien rigoureux. Confiez votre bassin à l'expertise reconnue de notre équipe pour une tranquillité absolue.
+            </p>
+            
+            <div className="flex flex-col sm:flex-row gap-4">
+              <button 
+                onClick={() => setActiveModal('devis')}
+                className="bg-amber-500 hover:bg-amber-400 text-slate-900 px-8 py-4 rounded-full font-bold text-lg transition-all shadow-[0_0_20px_rgba(245,158,11,0.4)] hover:shadow-[0_0_30px_rgba(245,158,11,0.6)] flex items-center justify-center gap-2"
+              >
+                Estimer mon projet <ArrowRight size={20} />
+              </button>
+              <button 
+                onClick={() => setActiveModal('rappel')}
+                className="bg-white/10 hover:bg-white/20 backdrop-blur-md text-white border border-white/30 px-8 py-4 rounded-full font-bold text-lg transition-all flex items-center justify-center gap-2"
+              >
+                <Phone size={20} /> Être rappelé
+              </button>
+            </div>
+          </Reveal>
+        </div>
+      </section>
+
+      {/* --- SERVICES SECTION --- */}
+      <section id="services" className="py-24 bg-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <Reveal className="text-center mb-16">
+            <h2 className="text-sm font-bold tracking-widest text-amber-600 uppercase mb-3">Notre Savoir-Faire</h2>
+            <h3 className="text-4xl md:text-5xl font-bold text-slate-900 mb-6">Des prestations <span className="font-serif italic font-light text-slate-600">premium</span></h3>
+            <div className="w-24 h-1 bg-amber-500 mx-auto rounded-full"></div>
+          </Reveal>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {/* Service 1 */}
+            <Reveal delay={100} className="group cursor-pointer">
+              <div className="relative h-80 rounded-2xl overflow-hidden mb-6 shadow-lg bg-slate-200">
+                <img 
+                  src={images.construction} 
+                  alt="Construction piscine" 
+                  className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" 
+                  onError={(e) => { e.target.src = images.hero; }}
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-slate-900/80 to-transparent"></div>
+                <div className="absolute bottom-6 left-6 text-white">
+                  <div className="bg-amber-500 p-3 rounded-full inline-block mb-3 shadow-lg">
+                    <Droplets size={24} className="text-slate-900" />
+                  </div>
+                  <h4 className="text-2xl font-bold">Construction</h4>
+                </div>
+              </div>
+              <p className="text-slate-600 leading-relaxed px-2">
+                Création de piscines sur-mesure qui s'intègrent parfaitement à votre environnement extérieur. Design contemporain ou traditionnel.
+              </p>
+            </Reveal>
+
+            {/* Service 2 */}
+            <Reveal delay={200} className="group cursor-pointer">
+              <div className="relative h-80 rounded-2xl overflow-hidden mb-6 shadow-lg bg-slate-200">
+                <img 
+                  src={images.entretien} 
+                  alt="Entretien piscine" 
+                  className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" 
+                  onError={(e) => { e.target.src = "https://images.unsplash.com/photo-1519302959554-a75be0afc82a?auto=format&fit=crop&w=800&q=80"; }}
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-slate-900/80 to-transparent"></div>
+                <div className="absolute bottom-6 left-6 text-white">
+                  <div className="bg-amber-500 p-3 rounded-full inline-block mb-3 shadow-lg">
+                    <CheckCircle size={24} className="text-slate-900" />
+                  </div>
+                  <h4 className="text-2xl font-bold">Entretien</h4>
+                </div>
+              </div>
+              <p className="text-slate-600 leading-relaxed px-2">
+                Un travail impeccable tout au long de l'année. Confiez l'entretien régulier de votre bassin à Marc pour une eau toujours cristalline.
+              </p>
+            </Reveal>
+
+            {/* Service 3 */}
+            <Reveal delay={300} className="group cursor-pointer">
+              <div className="relative h-80 rounded-2xl overflow-hidden mb-6 shadow-lg bg-slate-200">
+                <img 
+                  src={images.renovation} 
+                  alt="Rénovation piscine" 
+                  className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" 
+                  onError={(e) => { e.target.src = images.hero; }}
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-slate-900/80 to-transparent"></div>
+                <div className="absolute bottom-6 left-6 text-white">
+                  <div className="bg-amber-500 p-3 rounded-full inline-block mb-3 shadow-lg">
+                    <Wrench size={24} className="text-slate-900" />
+                  </div>
+                  <h4 className="text-2xl font-bold">Rénovation & Réparation</h4>
+                </div>
+              </div>
+              <p className="text-slate-600 leading-relaxed px-2">
+                Expertise technique, recherche de fuites et modernisation de votre installation pour redonner vie à votre espace baignade.
+              </p>
+            </Reveal>
+          </div>
+        </div>
+      </section>
+
+      {/* --- BANNER CTA --- */}
+      <section className="py-16 bg-slate-900 relative overflow-hidden">
+        <div className="absolute right-0 top-0 w-1/2 h-full bg-amber-600/10 rounded-l-full blur-3xl transform translate-x-1/3"></div>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 flex flex-col md:flex-row items-center justify-between gap-8">
+          <Reveal>
+            <h2 className="text-3xl md:text-4xl font-bold text-white mb-2">Un projet en tête ?</h2>
+            <p className="text-slate-400 text-lg">Nos experts sont à votre disposition pour une étude personnalisée.</p>
+          </Reveal>
+          <Reveal delay={200}>
+            <button 
+              onClick={() => setActiveModal('devis')}
+              className="bg-amber-500 hover:bg-amber-400 text-slate-900 px-8 py-4 rounded-full font-bold text-lg transition-all shadow-lg hover:shadow-xl w-full sm:w-auto"
+            >
+              Démarrer la simulation
+            </button>
+          </Reveal>
+        </div>
+      </section>
+
+      {/* --- TESTIMONIALS SECTION --- */}
+      <section id="avis" className="py-24 bg-slate-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <Reveal className="text-center mb-16">
+            <h2 className="text-sm font-bold tracking-widest text-amber-600 uppercase mb-3">La parole à nos clients</h2>
+            <h3 className="text-4xl font-bold text-slate-900">Ils nous font <span className="font-serif italic font-light text-slate-600">confiance</span></h3>
+          </Reveal>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+            {/* Review 1 */}
+            <Reveal delay={100} className="bg-white p-8 rounded-3xl shadow-[0_4px_20px_rgba(0,0,0,0.03)] border border-slate-100 relative">
+              <div className="flex text-amber-400 mb-4">
+                <Star fill="currentColor" size={20} /><Star fill="currentColor" size={20} /><Star fill="currentColor" size={20} /><Star fill="currentColor" size={20} /><Star fill="currentColor" size={20} />
+              </div>
+              <p className="text-slate-700 text-lg italic mb-6">
+                "Chaque année je fais appel à Marc pour l’entretien de ma piscine, toujours fiable et un travail impeccable."
+              </p>
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 bg-slate-200 rounded-full flex items-center justify-center text-slate-600 font-bold text-xl">M</div>
+                <div>
+                  <h4 className="font-bold text-slate-900">Martin Rouxel</h4>
+                  <p className="text-sm text-slate-500">Client fidèle</p>
+                </div>
+              </div>
+            </Reveal>
+
+            {/* Review 2 */}
+            <Reveal delay={200} className="bg-white p-8 rounded-3xl shadow-[0_4px_20px_rgba(0,0,0,0.03)] border border-slate-100 relative">
+              <div className="flex text-amber-400 mb-4">
+                <Star fill="currentColor" size={20} /><Star fill="currentColor" size={20} /><Star fill="currentColor" size={20} /><Star fill="currentColor" size={20} /><Star fill="currentColor" size={20} />
+              </div>
+              <p className="text-slate-700 text-lg italic mb-6">
+                "Ravie du professionnalisme et de la réactivité de Marc à des prix toujours raisonnables 👍"
+              </p>
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 bg-slate-200 rounded-full flex items-center justify-center text-slate-600 font-bold text-xl">S</div>
+                <div>
+                  <h4 className="font-bold text-slate-900">Sylvie Guillerey</h4>
+                  <p className="text-sm text-slate-500">Local Guide</p>
+                </div>
+              </div>
+            </Reveal>
+          </div>
+        </div>
+      </section>
+
+      {/* --- FOOTER --- */}
+      <footer className="bg-slate-950 text-slate-400 py-16 border-t border-slate-800">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 md:grid-cols-3 gap-12">
+          <div>
+            <span className="text-2xl font-bold tracking-tighter text-white uppercase block mb-6">
+              Piscine <span className="text-amber-600 font-light">Cezanne</span>
+            </span>
+            <p className="mb-6 max-w-sm">Votre partenaire de confiance pour la construction, l'entretien et la rénovation de piscines haut de gamme sur le bassin aixois.</p>
+          </div>
+          
+          <div>
+            <h4 className="text-white font-bold mb-6 uppercase tracking-wider text-sm">Contact</h4>
+            <ul className="space-y-4">
+              <li className="flex items-start gap-3">
+                <MapPin className="text-amber-500 mt-1 flex-shrink-0" size={18} />
+                <span>105 Chem. des Plâtrières<br/>13090 Aix-en-Provence</span>
+              </li>
+              <li className="flex items-center gap-3">
+                <Phone className="text-amber-500 flex-shrink-0" size={18} />
+                <span className="text-white font-medium">06 13 81 05 05</span>
+              </li>
+            </ul>
+          </div>
+
+          <div>
+            <h4 className="text-white font-bold mb-6 uppercase tracking-wider text-sm">Horaires</h4>
+            <ul className="space-y-2">
+              <li className="flex justify-between border-b border-slate-800 pb-2"><span>Lundi - Vendredi</span> <span className="text-white">08:00 - 20:00</span></li>
+              <li className="flex justify-between border-b border-slate-800 pb-2 pt-2"><span>Samedi</span> <span className="text-white">08:00 - 20:00</span></li>
+              <li className="flex justify-between pt-2"><span>Dimanche</span> <span className="text-amber-500">Fermé</span></li>
+            </ul>
+          </div>
+        </div>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-12 pt-8 border-t border-slate-800 text-sm text-center">
+          &copy; {new Date().getFullYear()} Piscine Cezanne. Tous droits réservés.
+        </div>
+      </footer>
+
+      {/* --- MODALS --- */}
+      {/* 1. Modal Simulation Devis */}
+      {activeModal === 'devis' && <DevisModal onClose={() => setActiveModal(null)} />}
+      
+      {/* 2. Modal Etre Rappelé */}
+      {activeModal === 'rappel' && <RappelModal onClose={() => setActiveModal(null)} />}
+
+    </div>
+  );
+}
+
+// --- DEVIS MODAL COMPONENT (Multi-step form) ---
+function DevisModal({ onClose }) {
+  const [step, setStep] = useState(1);
+  const [formData, setFormData] = useState({ type: '', delai: '', nom: '', tel: '', email: '' });
+
+  const handleSelect = (field, value) => {
+    setFormData({ ...formData, [field]: value });
+    setTimeout(() => setStep(step + 1), 300); // Auto-advance smoothly
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    setStep(4); // Success step
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+      <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onClick={onClose}></div>
+      <div className="relative bg-white rounded-3xl shadow-2xl w-full max-w-2xl overflow-hidden animate-[fadeIn_0.3s_ease-out]">
+        
+        {/* Header */}
+        <div className="bg-slate-900 p-6 flex justify-between items-center text-white">
+          <h3 className="text-xl font-bold">Simulation de devis</h3>
+          <button onClick={onClose} className="p-2 hover:bg-slate-800 rounded-full transition-colors"><X size={24} /></button>
+        </div>
+
+        {/* Progress Bar */}
+        <div className="h-2 bg-slate-100 w-full">
+          <div 
+            className="h-full bg-amber-500 transition-all duration-500 ease-out" 
+            style={{ width: `${(step / 4) * 100}%` }}
+          ></div>
+        </div>
+
+        {/* Content */}
+        <div className="p-8 min-h-[400px] flex flex-col justify-center">
+          
+          {step === 1 && (
+            <div className="animate-[slideIn_0.4s_ease-out]">
+              <h4 className="text-2xl font-bold text-slate-900 mb-6 text-center">Quel est votre projet ?</h4>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                {['Construction', 'Rénovation', 'Entretien'].map((type) => (
+                  <button 
+                    key={type}
+                    onClick={() => handleSelect('type', type)}
+                    className="p-6 border-2 border-slate-100 rounded-2xl hover:border-amber-500 hover:bg-amber-50 transition-all group flex flex-col items-center gap-4"
+                  >
+                    <div className="w-16 h-16 rounded-full bg-slate-50 flex items-center justify-center group-hover:bg-amber-100 transition-colors">
+                      {type === 'Construction' ? <Droplets className="text-amber-600" /> : type === 'Rénovation' ? <Wrench className="text-amber-600" /> : <CheckCircle className="text-amber-600" />}
+                    </div>
+                    <span className="font-bold text-slate-700">{type}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {step === 2 && (
+            <div className="animate-[slideIn_0.4s_ease-out]">
+              <button onClick={() => setStep(1)} className="text-sm text-slate-500 mb-4 hover:text-slate-900">← Retour</button>
+              <h4 className="text-2xl font-bold text-slate-900 mb-6 text-center">Pour quand prévoyez-vous ce projet ?</h4>
+              <div className="space-y-3">
+                {['Immédiatement', 'Dans les 3 mois', 'Dans l\'année', 'Je me renseigne juste'].map((delai) => (
+                  <button 
+                    key={delai}
+                    onClick={() => handleSelect('delai', delai)}
+                    className="w-full p-4 border-2 border-slate-100 rounded-xl hover:border-amber-500 hover:bg-amber-50 transition-all text-left font-medium text-slate-700 flex justify-between items-center"
+                  >
+                    {delai} <ChevronRight size={18} className="text-slate-400" />
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {step === 3 && (
+            <div className="animate-[slideIn_0.4s_ease-out]">
+              <button onClick={() => setStep(2)} className="text-sm text-slate-500 mb-4 hover:text-slate-900">← Retour</button>
+              <h4 className="text-2xl font-bold text-slate-900 mb-2 text-center">Vos coordonnées</h4>
+              <p className="text-center text-slate-500 mb-6">Où pouvons-nous vous envoyer l'estimation ?</p>
+              <form onSubmit={handleSubmit} className="space-y-4 max-w-md mx-auto">
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-1">Nom complet</label>
+                  <input required type="text" className="w-full p-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none transition-all" placeholder="Jean Dupont" />
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-1">Téléphone</label>
+                    <input required type="tel" className="w-full p-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none transition-all" placeholder="06 12 34 56 78" />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-1">Email</label>
+                    <input required type="email" className="w-full p-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none transition-all" placeholder="email@exemple.com" />
+                  </div>
+                </div>
+                <button type="submit" className="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold py-4 rounded-xl mt-4 transition-all">
+                  Recevoir mon estimation
+                </button>
+              </form>
+            </div>
+          )}
+
+          {step === 4 && (
+            <div className="text-center animate-[slideIn_0.4s_ease-out]">
+              <div className="w-24 h-24 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                <CheckCircle size={48} className="text-green-500" />
+              </div>
+              <h4 className="text-3xl font-bold text-slate-900 mb-4">Demande envoyée !</h4>
+              <p className="text-slate-600 mb-8 max-w-sm mx-auto">
+                Merci pour votre confiance. Marc ou un membre de notre équipe analysera votre demande de <strong>{formData.type}</strong> et vous contactera très rapidement.
+              </p>
+              <button onClick={onClose} className="bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold py-3 px-8 rounded-full transition-all">
+                Fermer
+              </button>
+            </div>
+          )}
+
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// --- RAPPEL MODAL COMPONENT (Simple Form) ---
+function RappelModal({ onClose }) {
+  const [isSubmitted, setIsSubmitted] = useState(false);
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    setIsSubmitted(true);
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+      <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onClick={onClose}></div>
+      <div className="relative bg-white rounded-3xl shadow-2xl w-full max-w-md overflow-hidden animate-[fadeIn_0.3s_ease-out]">
+        
+        <div className="p-8">
+          <div className="flex justify-between items-start mb-6">
+            <div className="w-12 h-12 bg-amber-100 rounded-full flex items-center justify-center text-amber-600">
+              <Phone size={24} />
+            </div>
+            <button onClick={onClose} className="text-slate-400 hover:text-slate-900 transition-colors"><X size={24} /></button>
+          </div>
+
+          {!isSubmitted ? (
+            <>
+              <h3 className="text-2xl font-bold text-slate-900 mb-2">Être rappelé</h3>
+              <p className="text-slate-500 mb-6">Laissez-nous vos coordonnées et le créneau idéal pour vous joindre. Nous vous appellerons à l'heure convenue.</p>
+              
+              <form onSubmit={handleSubmit} className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-1">Votre Nom</label>
+                  <input required type="text" className="w-full p-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none transition-all" placeholder="Ex: Martin" />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-1">Numéro de téléphone</label>
+                  <input required type="tel" className="w-full p-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none transition-all" placeholder="06 13 81 05 05" />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-1">Créneau de rappel souhaité</label>
+                  <div className="relative">
+                    <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400" size={18} />
+                    <select required className="w-full p-3 pl-10 border border-slate-200 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none transition-all appearance-none bg-white">
+                      <option value="">Sélectionnez une option</option>
+                      <option value="matin">Demain matin (09h - 12h)</option>
+                      <option value="aprem">Demain après-midi (14h - 18h)</option>
+                      <option value="asap">Dès que possible</option>
+                    </select>
+                  </div>
+                </div>
+                <button type="submit" className="w-full bg-amber-500 hover:bg-amber-400 text-slate-900 font-bold py-4 rounded-xl mt-2 transition-all shadow-lg hover:shadow-xl">
+                  Confirmer le rappel
+                </button>
+              </form>
+            </>
+          ) : (
+            <div className="text-center py-8">
+              <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <CheckCircle size={40} className="text-green-500" />
+              </div>
+              <h4 className="text-2xl font-bold text-slate-900 mb-2">C'est noté !</h4>
+              <p className="text-slate-600 mb-6">Nous avons bien enregistré votre demande. Notre équipe vous contactera au créneau souhaité.</p>
+              <button onClick={onClose} className="w-full bg-slate-900 text-white font-bold py-3 rounded-xl hover:bg-slate-800 transition-all">
+                Retour au site
+              </button>
+            </div>
+          )}
+        </div>
+      </div>
+      
+      {/* Basic Keyframe animations for modals */}
+      <style dangerouslySetInnerHTML={{__html: `
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes slideIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+      `}} />
+    </div>
+  );
+}
